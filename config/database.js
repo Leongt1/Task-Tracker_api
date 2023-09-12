@@ -1,8 +1,10 @@
-// require('dotenv').config();
+require('dotenv').config();
 const {MongoClient} = require('mongodb');
 
-const tasksDBUrl = 'mongodb://127.0.0.1:27017/task-traker-api';
-const authDBUrl = 'mongodb://127.0.0.1:27017/auth-user-api';
+const tasksDBUrl = process.env.TASKDB_URI;
+// const tasksDBUrl = 'mongodb://127.0.0.1:27017/task-traker-api';
+const authDBUrl = process.env.AUTHDB_URI;
+// const authDBUrl = 'mongodb://127.0.0.1:27017/auth-user-api';
 
 const tasksClient = new MongoClient(tasksDBUrl);
 const authClient = new MongoClient(authDBUrl);
