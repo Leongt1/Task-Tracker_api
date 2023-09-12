@@ -1,3 +1,5 @@
-[<img scr="https://cdn.gomix.com/2bdfb3f8-05ef-4035-a06e-2043962a3a13%2Fremix-button.svg" width="160px" color="white" />](https://glitch.com/edit/#!/import/github/gitdagray/Task-Tracker-api")
+A RESTful API for creating and managing tasks, which can be done after providing user authentication, which was done with the help of JWT.
+All required routes for user authentication(login, signup), performing CRUD operations on the tasks, and as well as refreshing the accessToken are all made successfully.
+The user data and the task data are stored in two different MongoDB databases.
 
-**Click the above button to deploy**
+The deployed link will be added soon!
