@@ -1,11 +1,4 @@
-const usersDB = {
-	users: require("../models/users.json"),
-	setUsers: function (data) {
-		this.users = data;
-	},
-};
-const fsPromises = require("fs").promises;
-const path = require("path");
+const User = require("../models/user.model");
 
 const handleLogout = async (req, res) => {
 	// on client, also delete the accessToken
@@ -13,13 +6,12 @@ const handleLogout = async (req, res) => {
 	const cookies = req.cookies;
 	if (!cookies?.jwt) return res.sendStatus(204); //no content
 	const refreshToken = cookies.jwt;
+	// console.log(refreshToken);
 
-	// is refreshToken in db
+	// is refreshToken in db?
   // if cookie is found but the user with the same cookie refreshToken is not found 
-	const foundUser = usersDB.users.find(
-		(person) => person.refreshToken === refreshToken
-	);
-	// console.log(foundUser)
+	const foundUser = await User.getUserByRefreshToken(refreshToken);
+	// console.log(foundUser);
   
 	if (!foundUser) {
 		res.clearCookie("jwt", {
@@ -32,15 +24,15 @@ const handleLogout = async (req, res) => {
 
   // if cookie is found and the corresponding user
 	// delete the refreshToken from db
-	const otherUsers = usersDB.users.filter(
-		(person) => person.refreshToken !== foundUser.refreshToken
+	foundUser.refreshToken = '';
+	const logoutUser = new User(
+		foundUser.username, 
+		foundUser.password,
+		foundUser.roles, 
+		foundUser.refreshToken
 	);
-	const currentUser = { ...foundUser, refreshToken: "" };
-	usersDB.setUsers([...otherUsers, currentUser]);
-	await fsPromises.writeFile(
-		path.join(__dirname, "..", "models", "users.json"),
-		JSON.stringify(usersDB.users)
-	);
+	const result = await logoutUser.logout();
+	console.log(result);
 
 	res.clearCookie("jwt", { 
     httpOnly: true,
@@ -48,7 +40,7 @@ const handleLogout = async (req, res) => {
     secure: true,
   });
 
-  res.status(204).json({'logged out user': currentUser.username});
+  return res.status(202).json({'logged out user': logoutUser.username});
 };
 
 module.exports = {

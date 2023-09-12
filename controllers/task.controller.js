@@ -14,7 +14,9 @@ const getAllTasks = async(req, res) => {
 
 const addTask = async(req, res) => {
   const {title, description, dueDate, priority, taskStatus} = req.body;
-
+  if(!req?.body) {
+    return res.status(401).json({'message': "All fields are required!"})
+  }
   const task = new Task(title, description, dueDate, priority, taskStatus);
   
   let result;
@@ -32,30 +34,27 @@ const addTask = async(req, res) => {
 
 const getTask = async (req, res) => {
   const taskId = req.params.id;
+  if(!taskId) return res.status(401).json({'Invalid TaskID': 'Task not found'})
   try {
     const task = await Task.getTaskById(taskId);
-    if(task) {
-      res.json({
-        task: task
-      });
-    } else {
-       res.status(404).json({message: 'Task not found!'});
-    }
+    res.json({
+      task: task
+    });
   } catch (err) {
     return res.status(500).json({message: err.message});
   }
-  
 }
 
 const updateTask = async(req, res) => {
   const taskId = req.params.id;
-  
-  let task = await Task.getTaskById(taskId);
+  if(!taskId) return res.status(401).json({'Invalid TaskID': 'Task not found'})
+  let task;
   let newTask;
-  if(task) {
+  try{
+    task = await Task.getTaskById(taskId);
     newTask = new Task(req.body.title, req.body.description, req.body.dueDate, req.body.priority, req.body.taskStatus, taskId)
-  } else {
-    res.status(404).json({message: 'id for updating task not found '})
+  } catch(err) {
+    return res.status(500).json({'TaskId not found': err.message});
   }
   try{
     // console.log({...req.body});
@@ -64,12 +63,14 @@ const updateTask = async(req, res) => {
       updatedTask: newTask
     })
   } catch(err) {
-    res.status(500).json({message: 'Error occurred updating task!'})
+    res.status(500).json({'Error occurred updating task!': err.message});
   }
 }
 
 const deleteTask = async(req, res) => {
   const taskId= req.params.id;
+  if(!taskId) return res.status(401).json({'Invalid TaskID': 'Task not found'})
+
   try {
     await Task.delete(taskId);
     res.json({
@@ -78,7 +79,6 @@ const deleteTask = async(req, res) => {
   } catch(err) {
     res.status(505).json({message: 'Error occured when deleting task'})
   }
-
 }
 
 module.exports = {
